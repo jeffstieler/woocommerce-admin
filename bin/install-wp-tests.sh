@@ -19,8 +19,8 @@ WP_CORE_DIR=${WP_CORE_DIR-$TMPDIR/wordpress/}
 
 # Error if WP < 5
 if [[ $WP_VERSION =~ ^([0-9]+)[0-9\.]+\-? ]]; then
-	if [ "5.2" -gt "${BASH_REMATCH[1]}" ]; then
-		echo "You must use WordPress 5.2 or greater."
+	if [ "5.3" -gt "${BASH_REMATCH[1]}" ]; then
+		echo "You must use WordPress 5.3 or greater."
 		exit 1
 	fi
 fi
@@ -169,10 +169,11 @@ install_deps() {
 	php wp-cli.phar core config --dbname=$DB_NAME --dbuser=$DB_USER --dbpass=$DB_PASS --dbhost=$DB_HOST --dbprefix=wptests_
 	php wp-cli.phar core install --url="$WP_SITE_URL" --title="Example" --admin_user=admin --admin_password=password --admin_email=info@example.com --path=$WP_CORE_DIR --skip-email
 
-	# Install WooCommerce
+	# Install WooCommerce (latest non-hyphenated (beta, RC) tag)
+	LATEST_WC_TAG="$(git ls-remote --tags https://github.com/woocommerce/woocommerce.git | awk '{print $2}' | sed 's/^refs\/tags\///' | grep -E '^[0-9]\.[0-9]\.[0-9]$' | sort -V | tail -n 1)"
 	cd "wp-content/plugins/"
 	# As zip file does not include tests, we have to get it from git repo.
-	git clone --depth 1 https://github.com/woocommerce/woocommerce.git
+	git clone --depth 1 --branch $LATEST_WC_TAG https://github.com/woocommerce/woocommerce.git
 
 	# Bring in WooCommerce Core dependencies
 	cd "woocommerce"

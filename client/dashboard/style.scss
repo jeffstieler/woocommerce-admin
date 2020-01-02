@@ -115,6 +115,7 @@
 
 		.components-base-control__help {
 			top: 100%;
+			left: $gap-small;
 			position: absolute;
 			margin-top: $gap-smallest;
 			font-size: 12px;
@@ -177,5 +178,64 @@
 			$studio-pink-50 72%
 		) !important; // Gutenberg & PostCSS Add the gradient late in output, based on the 'primary' color, which in our case is purple. Our busy state should be pink.
 		/* stylelint-enable */
+	}
+
+	&:disabled {
+		cursor: not-allowed;
+	}
+}
+
+.components-modal__frame.woocommerce-cart-modal {
+	width: 600px;
+	max-width: 100%;
+
+	.components-modal__header {
+		border-bottom: 0;
+		margin-bottom: $gap;
+		margin-top: $gap;
+
+		button {
+			display: none;
+		}
+	}
+
+	.components-modal__header-heading {
+		font-style: normal;
+		font-weight: normal;
+		font-size: 24px;
+		line-height: 32px;
+	}
+
+	.woocommerce-list {
+		margin-top: $gap-smallest;
+	}
+
+	.woocommerce-list .woocommerce-list__item:first-child {
+		border-top: 1px solid $studio-gray-5;
+	}
+
+	.woocommerce-list__item {
+		border-bottom: 1px solid $studio-gray-5;
+	}
+
+	.woocommerce-cart-modal__help-text {
+		font-size: 16px;
+		line-height: 24px;
+	}
+
+	.woocommerce-cart-modal__actions {
+		text-align: right;
+
+		button.is-link {
+			color: $studio-pink;
+			margin-right: $gap;
+			text-decoration: none;
+			font-weight: 600;
+			font-size: 14px;
+		}
+
+		button.is-primary {
+			align-self: flex-end;
+		}
 	}
 }

@@ -143,10 +143,17 @@ class Shipping extends Component {
 	}
 
 	getSteps() {
-		const { countryCode } = this.props;
-		const plugins = [ 'GB', 'CA', 'AU' ].includes( countryCode )
-			? [ 'woocommerce-shipstation-integration' ]
-			: [ 'jetpack', 'woocommerce-services' ];
+		const { countryCode, isJetpackConnected } = this.props;
+		let plugins = [];
+		if ( [ 'GB', 'CA', 'AU' ].includes( countryCode ) ) {
+			plugins = [ 'woocommerce-shipstation-integration' ];
+		} else if ( 'US' === countryCode ) {
+			plugins = [ 'woocommerce-services' ];
+
+			if ( ! isJetpackConnected ) {
+				plugins.push( 'jetpack' );
+			}
+		}
 
 		const steps = [
 			{
@@ -174,6 +181,11 @@ class Shipping extends Component {
 				),
 				content: (
 					<ShippingRates
+						buttonText={
+							plugins.length
+								? __( 'Proceed', 'woocommerce-admin' )
+								: __( 'Complete task', 'woocommerce-admin' )
+						}
 						shippingZones={ this.state.shippingZones }
 						onComplete={ this.completeStep }
 						{ ...this.props }
@@ -184,7 +196,7 @@ class Shipping extends Component {
 			{
 				key: 'label_printing',
 				label: __( 'Enable shipping label printing', 'woocommerce-admin' ),
-				description: [ 'GB', 'CA', 'AU' ].includes( countryCode )
+				description: plugins.includes( 'woocommerce-shipstation-integration' )
 					? interpolateComponents( {
 							mixedString: __(
 								'We recommend using ShipStation to save time at the post office by printing your shipping ' +
@@ -220,7 +232,7 @@ class Shipping extends Component {
 						{ ...this.props }
 					/>
 				),
-				visible: [ 'US', 'GB', 'CA', 'AU' ].includes( countryCode ),
+				visible: plugins.length,
 			},
 			{
 				key: 'connect',
@@ -239,7 +251,7 @@ class Shipping extends Component {
 						} }
 					/>
 				),
-				visible: 'US' === countryCode,
+				visible: plugins.includes( 'jetpack' ),
 			},
 		];
 
@@ -267,7 +279,9 @@ class Shipping extends Component {
 
 export default compose(
 	withSelect( select => {
-		const { getSettings, getSettingsError, isGetSettingsRequesting } = select( 'wc-api' );
+		const { getSettings, getSettingsError, isGetSettingsRequesting, isJetpackConnected } = select(
+			'wc-api'
+		);
 
 		const settings = getSettings( 'general' );
 		const isSettingsError = Boolean( getSettingsError( 'general' ) );
@@ -279,7 +293,14 @@ export default compose(
 		const country = countryCode ? countries.find( c => c.code === countryCode ) : null;
 		const countryName = country ? country.name : null;
 
-		return { countryCode, countryName, isSettingsError, isSettingsRequesting, settings };
+		return {
+			countryCode,
+			countryName,
+			isJetpackConnected: isJetpackConnected(),
+			isSettingsError,
+			isSettingsRequesting,
+			settings,
+		};
 	} ),
 	withDispatch( dispatch => {
 		const { createNotice } = dispatch( 'core/notices' );

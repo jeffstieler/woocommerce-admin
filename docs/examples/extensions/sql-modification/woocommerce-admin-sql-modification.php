@@ -6,12 +6,43 @@
  */
 
 /**
- * Get the currencies available.
+ * Make the currency settings available to the javascript client using
+ * AssetDataRegistry, available in WooCommerce 3.9.
  *
- * @return array
+ * The add_currency_settings function is a most basic example, but below is
+ * a more elaborate example of how one might use AssetDataRegistry in classes.
+ *
+	```php
+	<?php
+
+	class MyClassWithAssetData {
+		private $asset_data_registry;
+		public function __construct( Automattic\WooCommerce\Blocks\AssetDataRegistry $asset_data_registry ) {
+			$this->asset_data_registry = $asset_data_registry;
+		}
+
+		protected function some_method_adding_assets() {
+			$this->asset_data_registry->add( 'myData', [ 'foo' => 'bar' ] );
+		}
+	}
+
+	// somewhere in the extensions bootstrap
+	class Bootstrap {
+		protected $container;
+		public function __construct( Automattic\WooCommerce\Blocks\Container $container ) {
+			$this->container = $container;
+			$this->container->register( MyClassWithAssetData::class, function( $blocks_container ) => {
+				return new MyClassWithAssetData( $blocks_container->get( Automattic\WooCommerce\Blocks\AssetDataRegistry::class ) );
+			} );
+		}
+	}
+
+	// now anywhere MyClassWithAssetData is instantiated it will automatically be
+	// constructed with the AssetDataRegistry
+	```
  */
-function get_currencies() {
-	return array(
+function add_currency_settings() {
+	$currencies = array(
 		array(
 			'label' => __( 'United States Dollar', 'woocommerce-admin' ),
 			'value' => 'USD',
@@ -25,6 +56,12 @@ function get_currencies() {
 			'value' => 'ZAR',
 		),
 	);
+
+	$data_registry = Automattic\WooCommerce\Blocks\Package::container()->get(
+		Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry::class
+	);
+
+	$data_registry->add( 'multiCurrency', $currencies );
 }
 
 /**
@@ -36,6 +73,8 @@ function add_report_register_script() {
 		return;
 	}
 
+	add_currency_settings();
+
 	wp_register_script(
 		'sql-modification',
 		plugins_url( '/dist/index.js', __FILE__ ),
@@ -45,21 +84,13 @@ function add_report_register_script() {
 			'wp-i18n',
 			'wp-plugins',
 			'wc-components',
+			'wc-settings',
 		),
 		filemtime( dirname( __FILE__ ) . '/dist/index.js' ),
 		true
 	);
 
 	wp_enqueue_script( 'sql-modification' );
-
-	// todo: This is not the right way to interact with wcSettings. Update once WooCommerce 3.9 is available.
-	wp_add_inline_script(
-		'sql-modification',
-		"wcSettings.multiCurrency = JSON.parse( decodeURIComponent( '"
-		. esc_js( rawurlencode( wp_json_encode( get_currencies() ) ) )
-		. "' ) );",
-		'before'
-	);
 }
 add_action( 'admin_enqueue_scripts', 'add_report_register_script' );
 
@@ -113,12 +144,12 @@ function add_join_subquery( $clauses ) {
 }
 
 add_filter( 'woocommerce_analytics_clauses_join_orders_subquery', 'add_join_subquery' );
-add_filter( 'woocommerce_analytics_clauses_join_order_stats_total', 'add_join_subquery' );
-add_filter( 'woocommerce_analytics_clauses_join_order_stats_interval', 'add_join_subquery' );
+add_filter( 'woocommerce_analytics_clauses_join_orders_stats_total', 'add_join_subquery' );
+add_filter( 'woocommerce_analytics_clauses_join_orders_stats_interval', 'add_join_subquery' );
 
 add_filter( 'woocommerce_analytics_clauses_join_products_subquery', 'add_join_subquery' );
-add_filter( 'woocommerce_analytics_clauses_join_product_stats_total', 'add_join_subquery' );
-add_filter( 'woocommerce_analytics_clauses_join_product_stats_interval', 'add_join_subquery' );
+add_filter( 'woocommerce_analytics_clauses_join_products_stats_total', 'add_join_subquery' );
+add_filter( 'woocommerce_analytics_clauses_join_products_stats_interval', 'add_join_subquery' );
 
 add_filter( 'woocommerce_analytics_clauses_join_categories_subquery', 'add_join_subquery' );
 
@@ -127,8 +158,8 @@ add_filter( 'woocommerce_analytics_clauses_join_coupons_stats_total', 'add_join_
 add_filter( 'woocommerce_analytics_clauses_join_coupons_stats_interval', 'add_join_subquery' );
 
 add_filter( 'woocommerce_analytics_clauses_join_taxes_subquery', 'add_join_subquery' );
-add_filter( 'woocommerce_analytics_clauses_join_tax_stats_total', 'add_join_subquery' );
-add_filter( 'woocommerce_analytics_clauses_join_tax_stats_interval', 'add_join_subquery' );
+add_filter( 'woocommerce_analytics_clauses_join_taxes_stats_total', 'add_join_subquery' );
+add_filter( 'woocommerce_analytics_clauses_join_taxes_stats_interval', 'add_join_subquery' );
 
 /**
  * Add a WHERE clause.
@@ -148,12 +179,12 @@ function add_where_subquery( $clauses ) {
 	return $clauses;
 }
 add_filter( 'woocommerce_analytics_clauses_where_orders_subquery', 'add_where_subquery' );
-add_filter( 'woocommerce_analytics_clauses_where_order_stats_total', 'add_where_subquery' );
-add_filter( 'woocommerce_analytics_clauses_where_order_stats_interval', 'add_where_subquery' );
+add_filter( 'woocommerce_analytics_clauses_where_orders_stats_total', 'add_where_subquery' );
+add_filter( 'woocommerce_analytics_clauses_where_orders_stats_interval', 'add_where_subquery' );
 
 add_filter( 'woocommerce_analytics_clauses_where_products_subquery', 'add_where_subquery' );
-add_filter( 'woocommerce_analytics_clauses_where_product_stats_total', 'add_where_subquery' );
-add_filter( 'woocommerce_analytics_clauses_where_product_stats_interval', 'add_where_subquery' );
+add_filter( 'woocommerce_analytics_clauses_where_products_stats_total', 'add_where_subquery' );
+add_filter( 'woocommerce_analytics_clauses_where_products_stats_interval', 'add_where_subquery' );
 
 add_filter( 'woocommerce_analytics_clauses_where_categories_subquery', 'add_where_subquery' );
 
@@ -162,8 +193,8 @@ add_filter( 'woocommerce_analytics_clauses_where_coupons_stats_total', 'add_wher
 add_filter( 'woocommerce_analytics_clauses_where_coupons_stats_interval', 'add_where_subquery' );
 
 add_filter( 'woocommerce_analytics_clauses_where_taxes_subquery', 'add_where_subquery' );
-add_filter( 'woocommerce_analytics_clauses_where_tax_stats_total', 'add_where_subquery' );
-add_filter( 'woocommerce_analytics_clauses_where_tax_stats_interval', 'add_where_subquery' );
+add_filter( 'woocommerce_analytics_clauses_where_taxes_stats_total', 'add_where_subquery' );
+add_filter( 'woocommerce_analytics_clauses_where_taxes_stats_interval', 'add_where_subquery' );
 
 /**
  * Add a SELECT clause.
@@ -178,12 +209,12 @@ function add_select_subquery( $clauses ) {
 }
 
 add_filter( 'woocommerce_analytics_clauses_select_orders_subquery', 'add_select_subquery' );
-add_filter( 'woocommerce_analytics_clauses_select_order_stats_total', 'add_select_subquery' );
-add_filter( 'woocommerce_analytics_clauses_select_order_stats_interval', 'add_select_subquery' );
+add_filter( 'woocommerce_analytics_clauses_select_orders_stats_total', 'add_select_subquery' );
+add_filter( 'woocommerce_analytics_clauses_select_orders_stats_interval', 'add_select_subquery' );
 
 add_filter( 'woocommerce_analytics_clauses_select_products_subquery', 'add_select_subquery' );
-add_filter( 'woocommerce_analytics_clauses_select_product_stats_total', 'add_select_subquery' );
-add_filter( 'woocommerce_analytics_clauses_select_product_stats_interval', 'add_select_subquery' );
+add_filter( 'woocommerce_analytics_clauses_select_products_stats_total', 'add_select_subquery' );
+add_filter( 'woocommerce_analytics_clauses_select_products_stats_interval', 'add_select_subquery' );
 
 add_filter( 'woocommerce_analytics_clauses_select_categories_subquery', 'add_select_subquery' );
 
@@ -192,5 +223,5 @@ add_filter( 'woocommerce_analytics_clauses_select_coupons_stats_total', 'add_sel
 add_filter( 'woocommerce_analytics_clauses_select_coupons_stats_interval', 'add_select_subquery' );
 
 add_filter( 'woocommerce_analytics_clauses_select_taxes_subquery', 'add_select_subquery' );
-add_filter( 'woocommerce_analytics_clauses_select_tax_stats_total', 'add_select_subquery' );
-add_filter( 'woocommerce_analytics_clauses_select_tax_stats_interval', 'add_select_subquery' );
+add_filter( 'woocommerce_analytics_clauses_select_taxes_stats_total', 'add_select_subquery' );
+add_filter( 'woocommerce_analytics_clauses_select_taxes_stats_interval', 'add_select_subquery' );

@@ -1,7 +1,7 @@
 === WooCommerce Admin ===
 Contributors: automattic
 Tags: ecommerce, e-commerce, store, sales, reports, analytics, dashboard, activity, notices, insights, stats, woo commerce, woocommerce
-Requires at least: 5.2.0
+Requires at least: 5.3.0
 Tested up to: 5.3.0
 Requires PHP: 5.6.20
 Stable tag: 1.0.0
@@ -34,7 +34,7 @@ WooCommerce Admin also allows store owners to customize a new dashboard screen w
 
 = Minimum Requirements =
 
-* WordPress 5.2
+* WordPress 5.3
 * WooCommerce 3.6.0 or greater
 * PHP version 5.6.20 or greater. PHP 7.2 or greater is recommended
 * MySQL version 5.0 or greater. MySQL 5.6 or greater is recommended
@@ -70,6 +70,55 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 3. Analytics
 
 == Changelog ==
+
+= 0.23.3 2019-12-26 =
+
+- Fix: don't run database migrations on new installs. #3473
+
+= 0.23.2 2019-12-19 =
+
+- Enhancement: allow filtering of hidden WP notices. #3391 (Activity Panel, Extensibility)
+- Fix: error when trying to download report data. #3429 (Analytics)
+- Bug: Fix user data fields filter name. #3428 (Dashboard)
+- Fix: `CompareFilter` functionality regression. #3421 (Analytics, Components, Packages)
+- Fix: Time zone offset calculation on customer last active date. #3388 (Analytics)
+- Fix: remove the header when user doesn't have required permissions #3386 (Activity Panel)
+
+= 0.23.1 2019-12-08 =
+
+- Fix: undefined function error.
+
+= 0.23.0 2019-12-06 =
+
+- Dev: Add currency extension #3328 (Packages)
+- Fix: errant moment locale data loading. #3362 (Components, Packages)
+- Dev: Packages: Prep for release. #3325 (Build, Components, Packages)
+- Bug: Settings: Persist date range selection #3293
+- Dev: Remove Newspack dependency. #3302
+- Dev: DB Updates: invalidate cache after update #3299
+- Fix: beginning of next day calculation on daylight saving time on the days the time changes. #3333 (Analytics)
+- Tweak: Add a filter that allows disabling WooCommerce Admin. #3350 (On Merge to WC Core)
+- Fix: Retrieve week last year data by calendar date instead of week alignment. #3271 (Analytics, Packages)
+- Bug: Check if extended_info is set for order report items #3315 (REST API)
+- Tweak: remove global settings dependency from Navigation package. #3294 (Components, Packages)
+- Fix: Fix checkout of master branch in CI environment. #3296 (Build)
+- Fix: decouple Date package from global wcSettings object. #3278 (Components, Packages)
+- Fix: Make the order count between customer and table total consistent. #3290 (Analytics)
+- Fix: decouple Currency and Number packages from global wcSettings object. #3277 (Components, Packages)
+- Bug: Filter invalid statuses from saved statuses #3268
+- Dev: use a filter to set default locale #3273
+- Dev: Allow core inclusion via Package.php #3196 (Build)
+- Dev: Fix filter gap on analytics select controls #3259 (Components, Packages)
+- Bug: Correcting and clarifying analytics terms and calculations #3104 (Analytics, Components, Packages)
+- Dev: rename data store get_* to add_* functions where function does not return values #3275
+- Tweak: Search component: remove dependency on settings global from countries autocompleter. #3262 (Components, Packages)
+- Dev: PHPCS fixes for onboarding files #3269 (Documentation)
+- Dev: Add a tracks queue to delay event recording & log embed page views #3250
+- Dev: Make WooCommerce brand localizable #3247
+- Fix: Add single customer REST API end point. #3174 (REST API)
+- Dev: fix typos in JS docs #3248
+- Bug: Select control: fix misalignment and hide scroll bar #3215 (Components, Packages)
+- Dev: capitalize WooCommerce Services #3249
 
 = 0.22.0 2019-11-13 =
 
